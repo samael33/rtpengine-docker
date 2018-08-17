@@ -1,12 +1,11 @@
 # Build container with all build deps and builds deb package
 FROM debian:9 as builder
 
+ENV BCG729_VER=1.0.4
+
 RUN sed -i 's/deb\.debian\.org/cloudfront\.debian\.net/g' /etc/apt/sources.list
 
 RUN apt-get update && apt-get install -y git && apt-get clean
-
-RUN git clone https://github.com/sipwise/rtpengine.git /rtpengine
-WORKDIR /rtpengine
 
 RUN apt-get update && apt-get install -y \
        build-essential \
@@ -32,11 +31,26 @@ RUN apt-get update && apt-get install -y \
        libevent-dev \
        libjson-glib-dev \
        libpcap-dev \
-       git \
+       wget \
+       curl \
+       unzip \
     && ( ( apt-get install -y linux-headers-$(uname -r) linux-image-$(uname -r) && \
       module-assistant update && \
       module-assistant auto-install ngcp-rtpengine-kernel-source ) || true ) \
     && apt-get clean && rm -rf /var/lib/apt/lists
+
+# Get G729 build
+RUN curl https://codeload.github.com/BelledonneCommunications/bcg729/tar.gz/$BCG729_VER > bcg729_$BCG729_VER.orig.tar.gz && \
+    tar zxf bcg729_$BCG729_VER.orig.tar.gz && \
+    cd bcg729-$BCG729_VER && \
+    git clone https://github.com/ossobv/bcg729-deb.git debian && \
+    dpkg-buildpackage -us -uc -sa && \
+    dpkg -i ../*.deb
+
+# Get RTPEngine
+RUN git clone https://github.com/sipwise/rtpengine.git /rtpengine
+
+WORKDIR /rtpengine
 
 RUN dpkg-checkbuilddeps
 RUN dpkg-buildpackage -b -us -uc

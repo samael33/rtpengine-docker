@@ -1,8 +1,7 @@
-[![Build Status](https://travis-ci.org/ReadyTalk/rtpengine-docker.svg?branch=master)](https://travis-ci.org/ReadyTalk/rtpengine-docker)
-
 # RTPEngine Docker
 
 A Docker container for running rtpengine.  This is meant to be used next to Kamailio for a WebRTC SIP Proxy.  It is largely based on the projects listed in the references.
+Now with G729 support
 
 ## References (and Credit)
 https://github.com/ianblenke/docker-rtpengine
